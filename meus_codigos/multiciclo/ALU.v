@@ -27,6 +27,7 @@ begin
 			default : ALUResult = 32'h0;
 		endcase
 	end
+	$display ("The operation is %b, the result is %d",ALUControl,ALUResult);
 end
 
 endmodule
