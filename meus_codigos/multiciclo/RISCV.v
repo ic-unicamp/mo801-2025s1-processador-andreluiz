@@ -7,12 +7,12 @@ module RISCV;
     reg [31:0] WD3;       // Dado a ser escrito no registrador
     wire [31:0] RD1, RD2; // Dados lidos dos registradores
     reg [24:0] immValue;
-    wire [31:0] result_multiplex_PC_oldPC_RD1, result_multiplex_RD2_immExt_4;
+    wire [31:0] result_multiplex_PC_oldPC_RD1, result_multiplex_RD2_immExt_4,result_multiplex_ALUResult_data_ALUOut;
 
     reg [31:0] srcA, srcB; // Operandos da ALU
     reg [1:0] ALUControl, ALUSrcA, ALUSrcB;  // Controle da operação da ALU
     wire Zero;             // Flag Zero da ALU
-    wire [31:0] ALUResult; // Resultado da ALU
+    wire [31:0] ALUResult, ALUOut,data; // Resultado da ALU
     wire [31:0] immExt;
     reg [31:0] PC, oldPC;
 
@@ -66,6 +66,16 @@ module RISCV;
         .ALUControl(ALUControl),
         .Zero(Zero),
         .ALUResult(ALUResult)
+    );
+
+    Multiplex multiplex_ALUResult_data_ALUOut (
+    	.clk(clk),
+    	.reset(reset),
+    	.ALUSrc(ALUSrcA),
+    	.opt1(ALUResult),
+    	.opt2(data),
+    	.opt3(ALUOut),
+    	.result(result_multiplex_ALUResult_data_ALUOut)
     );
 
     // Gerador de clock
