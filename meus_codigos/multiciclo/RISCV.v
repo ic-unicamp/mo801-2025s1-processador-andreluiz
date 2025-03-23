@@ -7,9 +7,10 @@ module RISCV;
     reg [31:0] WD3;       // Dado a ser escrito no registrador
     wire [31:0] RD1, RD2; // Dados lidos dos registradores
     reg [24:0] immValue;
+    wire [31:0] result_multiplexRD2_immExt;
 
     reg [31:0] srcA, srcB; // Operandos da ALU
-    reg [1:0] ALUControl;  // Controle da operação da ALU
+    reg [1:0] ALUControl, ALUSrcB;  // Controle da operação da ALU
     wire Zero;             // Flag Zero da ALU
     wire [31:0] ALUResult; // Resultado da ALU
     wire [31:0] immExt;
@@ -35,12 +36,22 @@ module RISCV;
         .immExt(immExt)
     );
 
+    Multiplex multiplex_RD2_immExt (
+    	.clk(clk),
+    	.reset(reset),
+    	.ALUSrc(ALUSrcB),
+    	.opt1(RD2),
+    	.opt2(immExt),
+    	.opt3(32'd4),
+    	.result(result_multiplexRD2_immExt)
+    );
+
     // Instância do ALU
     ALU alu_inst (
         .clk(clk),
         .reset(reset),
         .srcA(RD1),
-        .srcB(immExt),
+        .srcB(result_multiplexRD2_immExt),
         .ALUControl(ALUControl),
         .Zero(Zero),
         .ALUResult(ALUResult)
@@ -68,9 +79,10 @@ module RISCV;
 	    A1 = 5'd2;        // Defina A1 para acessar o registrador escrito
 	    A2 = 5'd2;
 	    immValue = 24'd15;
-	    #20;
+	    #10;
 	    clk = 3;
 	    ALUControl = 2'b10;
+	    ALUSrcB = 2'b10;
   
 	    // Passo 4: Verificar se o valor lido é igual a 30
 	    $display("Valor em Registers[A1]: %d; Registers[A2]: %d; immExt: %d; ALUResult: %d", RD1, RD2, immExt, ALUResult);
