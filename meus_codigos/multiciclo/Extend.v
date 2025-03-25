@@ -1,14 +1,21 @@
-module Extend(clk, reset, immValue, immSrc, immExt);
+module Extend(clk, reset, immValue, immSrc, immExt_l);
 
-input clk, reset, immSrc;
+input clk, reset; 
+input [1:0] immSrc;
 input [24:0] immValue;
 
-output reg [24:0] immExt;
+//Saída para funções do tipo L
+output reg [11:0] immExt_l;
+
 
 always @ (posedge clk)
 begin
-if(immSrc == 1'b1)
-	immExt = immValue;
+
+	case(immSrc)
+		2'b00 : immExt_l = immValue[24:13];
+		default : immExt_l = 32'h0;
+	endcase
+
 end
 
 endmodule
