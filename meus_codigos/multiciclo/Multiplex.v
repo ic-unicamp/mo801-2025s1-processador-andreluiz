@@ -8,15 +8,14 @@ output reg [31:0] result;
 
 always @ (posedge clk)
 begin
-	$display("opt3: %d",opt3);
-        $display("ALUSrc: %b",ALUSrc);
+	//$display("opt3: %d",opt3);
+        //$display("ALUSrc: %b",ALUSrc);
 	case(ALUSrc)
 	     2'b00 : result = opt1;
 	     2'b01 : result = opt2;
 	     2'b10 : result = opt3;
 	     default : result = 32'h0;
 	endcase
-
-	$display("result: %d",result);
+	//$display("result: %d",result);
 end
 endmodule

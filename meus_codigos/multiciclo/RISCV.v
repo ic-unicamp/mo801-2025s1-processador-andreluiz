@@ -1,7 +1,7 @@
 module RISCV;
 
 //Sinais
-reg clk, reset;
+reg clk, reset, save;
 
 //Inputs do Controller
 wire [2:0] func3; // 3 bits
@@ -51,6 +51,14 @@ wire [31:0] multiplex_srcB;
 //Multiplexador Adr - PC(0), address(1)
 wire [31:0] multiplex_adr;
 
+ProgramCounter Prog_count(
+	.clk(clk), 
+	.reset(reset),
+	.PCWrite(PCWrite), 
+	.PCNext(multiplex_alu), 
+	.PC(PC)
+);
+
 Multiplex_address Mult_adr(
 	.PC(PC),
 	.ALUResult(multiplex_alu), 
@@ -98,7 +106,7 @@ Extend Ext(
 	.reset(reset), 
 	.immValue(extend), 
 	.immSrc(ImmSrc), 
-	.immExt_l(ImmExt)
+	.immExt(ImmExt)
 );
 
 Multiplex Multiplex_instance_SrcA (
@@ -131,6 +139,13 @@ ALU Alu(
  	.ALUResult(ALUResult)
 );
 
+loadRegs_ALUOut loadReg(
+	.clk(clk),
+	.reset(reset),
+	.save(save),
+	.ALUResult(ALUResult),
+	.ALUOut(ALUOut)
+);
 
 Multiplex Multiplex_instance_ALU(
 	.clk(clk),

@@ -1,8 +1,8 @@
-module programCounter(clk, reset, PCNext, PC);
+module ProgramCounter(clk, reset, PCWrite, PCNext, PC);
 
-input clk, reset;
+input clk, reset, PCWrite;
 //Novo valor de PC;
-input [31:0]PCNext;
+input [31:0] PCNext;
 //Quem receberá o novo valor de PC;
 output reg [31:0] PC;
 
@@ -11,7 +11,6 @@ begin
 if(reset)
 	PC = 32'h00000000;
 else
-//Atribui novo valor de PC ao próximo PC
 	PC = PCNext;
 end
 endmodule

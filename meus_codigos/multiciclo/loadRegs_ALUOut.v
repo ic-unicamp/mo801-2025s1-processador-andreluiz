@@ -1,17 +1,13 @@
-module loadRegs_oneInput_oneOutput(clk, reset, singleInput, singleOutput);
-input clk, reset;
-input [31:0] singleInput;
-output reg [31:0] singleOutput;
+module loadRegs_ALUOut(clk, reset, save, ALUResult, ALUOut);
+input clk, reset, save;
+input [31:0] ALUResult;
+output reg [31:0] ALUOut;
 
 always @ (posedge clk)
 begin
 	if(reset == 1'b1)
-	begin
-		singleOutput = 32'h0;
-	end
-	else
-	begin
-		singleOutput = singleInput;
-	end
+	  ALUOut = 32'h0;
+	else if(save == 1'b1)
+	  ALUOut = ALUResult;
 end
 endmodule
