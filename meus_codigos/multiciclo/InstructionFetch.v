@@ -10,13 +10,13 @@ output reg [6:0] Instruction_func7;
 
 reg [31:0] InstructionRegister;
 
-initial begin
-	if(IRWrite)
-	InstructionRegister = RD;
-end
-
 always @ (posedge clk)
 begin
+	if(IRWrite == 1) begin
+	   InstructionRegister = RD;
+	   $display("InstructionRegister = %b", InstructionRegister);
+	end	
+
         Instruction_op = RD[6:0];
         Instruction_rd = RD[11:7];
 	Instruction_rs1 = RD[19:15];

@@ -6,9 +6,15 @@ output reg [31:0] address;
  
 always @ (posedge clk)
 begin
-	if(AdrSrc)
+	if(reset) begin
+	   address = 32'h0;
+	end;
+	
+	if(AdrSrc) begin
 	   address = ALUResult;
-	else
+	end
+	else begin
 	   address = PC;
+	end
 end 
 endmodule

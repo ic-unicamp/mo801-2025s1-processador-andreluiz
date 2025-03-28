@@ -11,6 +11,8 @@ begin
 if(reset)
 	PC = 32'h00000000;
 else
-	PC = PCNext;
+	if(PCWrite) begin
+   	   PC = PCNext;
+	end
 end
 endmodule

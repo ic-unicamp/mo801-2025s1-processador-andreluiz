@@ -51,15 +51,19 @@ wire [31:0] multiplex_srcB;
 //Multiplexador Adr - PC(0), address(1)
 wire [31:0] multiplex_adr;
 
+reg [31:0] teste = 32'b00101010010110; 
+
 ProgramCounter Prog_count(
 	.clk(clk), 
 	.reset(reset),
 	.PCWrite(PCWrite), 
-	.PCNext(multiplex_alu), 
+	.PCNext(teste), 
 	.PC(PC)
 );
 
 Multiplex_address Mult_adr(
+	.clk(clk),
+	.reset(reset),
 	.PC(PC),
 	.ALUResult(multiplex_alu), 
 	.AdrSrc(AdrSrc), 
@@ -67,7 +71,7 @@ Multiplex_address Mult_adr(
 );
 
 memory Mem(
-  .address(address),
+  .address(multiplex_adr),
   .data_in(RD2),
   .data_out(ReadData),
   .we(MemWrite)
@@ -142,7 +146,6 @@ ALU Alu(
 loadRegs_ALUOut loadReg(
 	.clk(clk),
 	.reset(reset),
-	.save(save),
 	.ALUResult(ALUResult),
 	.ALUOut(ALUOut)
 );
@@ -161,12 +164,76 @@ Multiplex Multiplex_instance_ALU(
 // Gerador de clock
 initial begin
 clk = 0;
+reset = 0;
+IRWrite = 0; 
+MemWrite = 0; 
+AdrSrc = 0; 
+PCWrite = 1; 
+RegWrite = 0;
+ResultSrc = 0;
+ALUSrcB = 0; 
+ALUSrcA = 0;
+ImmSrc = 0; 
+ALUControl = 0;
+#10;
 end
 
 // Simulação inicial
 initial begin
+$monitor("PCNext=%d, PC=%b, address=%b, ReadData=%b\nRs1=%b,Rs2=%b,Rd=%b,extend=%b,opcode=%b,func3=%b,func7=%b\n ImmSrc=%b, ImmExt = %d, Rs1=%d, RD1=%d\n ALUSrcA = %b, ALUSrcB = %b , ALUControl = %b\n ALUResult = %d, ALUOut = %d\n Multiplexador da ALU = %d",teste,PC,multiplex_adr,ReadData,Rs1,Rs2,Rd,extend,opcode,func3,func7, ImmSrc, ImmExt,Rs1, RD1, ALUSrcA, ALUSrcB, ALUControl, ALUResult, ALUOut, multiplex_alu);
+//Fetch
+clk=1;
+#10;
+clk=0;
+#10;
+clk=1;
+#10;
+clk=0;
+#10;
+clk=1;
+#10;
+clk=0;
+#10;
+//Decode and find RD1
+ImmSrc = 2'b00;
+//find extend 
+clk=1;
+#10;
+clk=0;
+#10;
+//Define valores que irão para a ALU e qual operação será feita
+ALUSrcA = 2'b10;
+ALUSrcB = 2'b01;
+ALUControl = 2'b10;
+clk=1;
+#10;
+clk=0;
+#10;
+//Salva valor no ALUOut
+clk=1;
+#10;
+clk=0;
 
+//Pega o valor no memory e salva no banco
+AdrSrc = 1;
+#10;
+clk=1;
+#10;
+clk=0;
+#10;
+ResultSrc = 2'b01;
+clk=1;
+#10;
+clk=0;  
+#10;
+RegWrite = 1;
+clk=1;
+#10;
+clk=0;
+#10;
 end
+
+
 
 
 endmodule

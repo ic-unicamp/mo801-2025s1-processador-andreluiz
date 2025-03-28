@@ -20,6 +20,13 @@ integer k;
 assign RD1 = Registers[A1];
 assign RD2 = Registers[A2];
 
+initial begin
+	for(k=0; k<32; k = k + 1)
+	begin
+		Registers[k] = 32'h0;
+	end
+end
+
 always @ (posedge clk)
 begin
 	if(reset)
