@@ -8,9 +8,9 @@ wire [2:0] func3; // 3 bits
 wire [6:0] opcode, func7; // 7 bits
 
 //Sinais do Controller
-reg IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite; //1 bit
-reg [1:0] ResultSrc, ALUSrcB, ALUSrcA, ImmSrc; //2 bit
-reg [2:0] ALUControl; 
+wire IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite; //1 bit
+wire [1:0] ResultSrc, ALUSrcB, ALUSrcA, ImmSrc; //2 bit
+wire [2:0] ALUControl; 
 
 //Inputs do ProgramCounter
 reg [31:0] PCNext;
@@ -36,6 +36,7 @@ wire [31:0] RD1, RD2; //O RD2 também é Input do memory, fazendo o papel de Wri
 wire [31:0] ImmExt;
 
 //Output da ALU
+wire Zero;
 wire [31:0] ALUResult, ALUOut;
 
 //Output dos multiplexadores
@@ -52,6 +53,25 @@ wire [31:0] multiplex_srcB;
 wire [31:0] multiplex_adr;
 
 reg [31:0] teste = 32'b00101010010110; 
+
+Controller cont(
+	.clk(clk),
+	.reset(reset), 
+	.opcode(opcode), 
+	.func3(func3), 
+	.func7(func7), 
+	.Zero(Zero), 
+	.IRWrite(IRWrite), 
+	.MemWrite(MemWrite), 
+	.AdrSrc(AdrSrc), 
+	.PCWrite(PCWrite), 
+	.RegWrite(RegWrite), 
+	.ResultSrc(ResultSrc), 
+	.ALUSrcB(ALUSrcB), 
+	.ALUSrcA(ALUSrcA), 
+	.ImmSrc(ImmSrc), 
+	.ALUControl(ALUControl)
+);
 
 ProgramCounter Prog_count(
 	.clk(clk), 
@@ -139,7 +159,7 @@ ALU Alu(
  	.srcA(multiplex_srcA), 
  	.srcB(multiplex_srcB), 
  	.ALUControl(ALUControl), 
- 	.Zero(0), 
+ 	.Zero(Zero), 
  	.ALUResult(ALUResult)
 );
 
@@ -165,72 +185,12 @@ Multiplex Multiplex_instance_ALU(
 initial begin
 clk = 0;
 reset = 0;
-IRWrite = 0; 
-MemWrite = 0; 
-AdrSrc = 0; 
-PCWrite = 1; 
-RegWrite = 0;
-ResultSrc = 0;
-ALUSrcB = 0; 
-ALUSrcA = 0;
-ImmSrc = 0; 
-ALUControl = 0;
 #10;
 end
 
 // Simulação inicial
 initial begin
-$monitor("PCNext=%d, PC=%b, address=%b, ReadData=%b\nRs1=%b,Rs2=%b,Rd=%b,extend=%b,opcode=%b,func3=%b,func7=%b\n ImmSrc=%b, ImmExt = %d, Rs1=%d, RD1=%d\n ALUSrcA = %b, ALUSrcB = %b , ALUControl = %b\n ALUResult = %d, ALUOut = %d\n Multiplexador da ALU = %d",teste,PC,multiplex_adr,ReadData,Rs1,Rs2,Rd,extend,opcode,func3,func7, ImmSrc, ImmExt,Rs1, RD1, ALUSrcA, ALUSrcB, ALUControl, ALUResult, ALUOut, multiplex_alu);
-//Fetch
-clk=1;
-#10;
-clk=0;
-#10;
-clk=1;
-#10;
-clk=0;
-#10;
-clk=1;
-#10;
-clk=0;
-#10;
-//Decode and find RD1
-ImmSrc = 2'b00;
-//find extend 
-clk=1;
-#10;
-clk=0;
-#10;
-//Define valores que irão para a ALU e qual operação será feita
-ALUSrcA = 2'b10;
-ALUSrcB = 2'b01;
-ALUControl = 2'b10;
-clk=1;
-#10;
-clk=0;
-#10;
-//Salva valor no ALUOut
-clk=1;
-#10;
-clk=0;
 
-//Pega o valor no memory e salva no banco
-AdrSrc = 1;
-#10;
-clk=1;
-#10;
-clk=0;
-#10;
-ResultSrc = 2'b01;
-clk=1;
-#10;
-clk=0;  
-#10;
-RegWrite = 1;
-clk=1;
-#10;
-clk=0;
-#10;
 end
 
 
