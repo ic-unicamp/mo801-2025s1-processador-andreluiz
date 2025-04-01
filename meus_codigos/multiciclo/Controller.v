@@ -14,142 +14,183 @@ reg branch = 0;
 
 reg [3:0] state;
 
-localparam Fetch             = 4'b0000;
-localparam Decode            = 4'b0001;
-localparam MemAdr            = 4'b0010;
-localparam MemRead           = 4'b0110;
-localparam MemWB             = 4'b0111;
-localparam MemWrite_state    = 4'b1100;
-localparam ExecuteR          = 4'b1010;
-localparam ExecuteL          = 4'b1110;
-localparam ALUWB             = 4'b1000;
-localparam BEQ               = 4'b1001;
-localparam JAL               = 4'b1011;
+localparam Fetch             = 5'b00000;
+localparam Decode            = 5'b00001;
+localparam MemAdr            = 5'b00010;
+localparam MemRead           = 5'b00110;
+localparam MemWB             = 5'b00111;
+localparam MemWrite_state    = 5'b01100;
+localparam ExecuteR          = 5'b01010;
+localparam ExecuteL          = 5'b01110;
+localparam ALUWB             = 5'b01000;
+localparam BEQ               = 5'b01001;
+localparam JAL               = 5'b01011;
+localparam Fetch_CalculatePC    = 5'b01111;
 
 initial begin
-	state = 4'b0000;
-	AdrSrc = 0; 
-	IRWrite = 0; 
-	ALUSrcA = 0;
-	ALUSrcB = 0; 
-	ALUControl = 0;
-	ResultSrc = 0;
-	RegWrite = 0;
-	MemWrite = 0; 
-	PCWrite = 0; 
-	ImmSrc = 0; 
+	state = 4'b11111;//Default
 end
 
 always @ (posedge clk)
 begin
-	branch = 0;
-	case(state)
-		Fetch:begin
-			AdrSrc = 0; 
-			IRWrite = 1; 
-			ALUSrcA = 2'b00;
-			ALUSrcB = 2'b10; 
-			ALUControl = 2'b00;
-			ResultSrc = 2'b10; 
-			PCWrite = 1; 
-			state = Decode;
-		end
-		Decode:begin
-			ALUSrcA = 2'b00;
-			ALUSrcB = 2'b10; 
-			ALUControl = 2'b00;
-			
-			case(opcode)
-				7'b0000011: state = MemAdr;
-				7'b0100011: state = MemAdr;
-				7'b0110011: state = ExecuteR;
-				7'b0010011: state = ExecuteL;
-				7'b1101111: state = JAL;
-				7'b1100011: state = BEQ;
-				default: state = Fetch;
-			endcase
-		end
-		MemAdr:begin
-			ALUSrcA = 2'b10;
-			ALUSrcB = 2'b01; 
-			ALUControl = 2'b00; 
-			
-			case(opcode)
-				7'b0000011: state = MemRead;
-				7'b0100011: state = MemWrite_state;
-				default: state = Fetch;
-			endcase
-			
-		end
-		MemRead:begin
-			AdrSrc = 1; 
-			ResultSrc = 2'b10;
-			
-			state = MemWB;
-		end
-		MemWB:begin
-			ResultSrc = 2'b01;
-			RegWrite = 1;
-			state = Fetch;
-		end
-		MemWrite_state:begin
-			AdrSrc = 1; 
-			ResultSrc = 2'b00;
-			MemWrite = 0; 
-			state = Fetch;
-		end
-		ExecuteR:begin
-			ALUSrcA = 2'b10;
-			ALUSrcB = 2'b00; 
-			ALUControl = 2'b10;
-			state = ALUWB;
-		end
-		ExecuteL:begin
-			ALUSrcA = 2'b10;
-			ALUSrcB = 2'b01; 
-			ALUControl = 2'b10;
-			state = ALUWB;
-		end
-		ALUWB:begin
-			ResultSrc = 2'b00;
-			RegWrite = 1;
-			state = Fetch;
-		end
-		BEQ:begin
-			ALUSrcA = 2'b10;
-			ALUSrcB = 2'b00; 
-			ALUControl = 2'b01;
-			ResultSrc = 2'b00;
-			branch = 1'b1;
-			if(branch == 1'b1 & Zero == 1'b1)
-				PCWrite = 1; 
-				
-			state = Fetch;
+//$display("IRWrite = %b, MemWrite = %b, AdrSrc = %b, PCWrite = %b, RegWrite = %b; ResultSrc = %b, ALUSrcB = %b, ALUSrcA = %b, ImmSrc = %b, ALUControl = %b\n", IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite, ResultSrc, ALUSrcB, ALUSrcA, ImmSrc, ALUControl);
+//$display("PCWrite = %b; IRWrite = %b; RegWrite = %b",PCWrite, IRWrite, RegWrite);
+	if(reset == 1'b0) begin
+		state = 5'b0000;
+	end else begin	
+		case(opcode)
+			7'b0000011: ImmSrc = 2'b00;
+			7'b0100011: ImmSrc = 2'b01;
+			7'b0010011: ImmSrc = 2'b00;
+			7'b1100011: ImmSrc = 2'b10;
+			default: ImmSrc = 2'b00;
+		endcase
 
-		end
-		JAL:begin
-			ALUSrcA = 2'b01;
-			ALUSrcB = 2'b10; 
-			ALUControl = 2'b00;
-			ResultSrc = 2'b00; 
-			PCWrite = 1;  
-			state = ALUWB;
-		end
-		default:begin
-			state = 4'b0000;
-			AdrSrc = 0; 
-			IRWrite = 0; 
-			ALUSrcA = 0;
-			ALUSrcB = 0; 
-			ALUControl = 0;
-			ResultSrc = 0;
-			RegWrite = 0;
-			MemWrite = 0; 
-			PCWrite = 0; 
-			ImmSrc = 0; 
-			state = Fetch;
+		branch = 0;
+		case(state)
+			Fetch_CalculatePC:begin
+				$display("Fetch_CalculatePC");
+				AdrSrc = 0; 
+				IRWrite = 1; 
+				ALUSrcA = 2'b00;
+				ALUSrcB = 2'b10; 
+				ALUControl = 2'b00;
+				ResultSrc = 2'b10; 
+				PCWrite = 0; 
+				state = Fetch;
+			end
+			Fetch:begin
+				$display("Fetch");
+				AdrSrc = 0; 
+				IRWrite = 1; 
+				ALUSrcA = 2'b00;
+				ALUSrcB = 2'b10; 
+				ALUControl = 2'b00;
+				ResultSrc = 2'b10; 
+				PCWrite = 1; 
+				state = Decode;
+			end
+			Decode:begin
+				$display("Decode");
+				PCWrite = 0;
+				IRWrite = 0;
+				MemWrite = 0;
+				RegWrite = 0;
+				case(opcode)
+					7'b0000011: state = MemAdr;
+					7'b0100011: state = MemAdr;
+					7'b0110011: state = ExecuteR;
+					7'b0010011: state = ExecuteL;
+					7'b1101111: state = JAL;
+					7'b1100011: state = BEQ;
+					default: state = Fetch_CalculatePC;
+				endcase
+			end
+			MemAdr:begin
+				$display("MemAdr");
+				ALUSrcA = 2'b10;
+				ALUSrcB = 2'b01; 
+				ALUControl = 2'b00; 
+				
+				case(opcode)
+					7'b0000011: state = MemRead;
+					7'b0100011: state = MemWrite_state;
+					default: state = Fetch_CalculatePC;
+				endcase
+				
+			end
+			MemRead:begin
+				$display("MemRead");
+				AdrSrc = 1; 
+				ResultSrc = 2'b10;
+				
+				state = MemWB;
+			end
+			MemWB:begin
+				$display("MemWB");
+				ResultSrc = 2'b01;
+				RegWrite = 1;
+				#10;
+				state = Fetch_CalculatePC;
+			end
+			MemWrite_state:begin
+				$display("MemWrite");
+				AdrSrc = 1; 
+				ResultSrc = 2'b00;
+				MemWrite = 0;
+				state = Fetch_CalculatePC;
+			end
+			ExecuteR:begin
+				$display("ExecuteR");
+				ALUSrcA = 2'b10;
+				ALUSrcB = 2'b00; 
+				case({func7,func3}) //Se der tempo, englobar outras possibilidades de operação
+					10'b0000000000: ALUControl = 2'b00;
+					10'b0100000000: ALUControl = 2'b01;
+					10'b0000000111: ALUControl = 2'b10;
+					10'b0000000110: ALUControl = 2'b11;
+				endcase
+				state = ALUWB;
+			end
+			ExecuteL:begin
+				$display("ExecuteL");
+				PCWrite = 0;
+				MemWrite = 0;
+				IRWrite = 0;
+				RegWrite = 0;
+				ALUSrcA = 2'b10;
+				ALUSrcB = 2'b01; 
+				ALUControl = func3;
+				state = ALUWB;
+			end
+			ALUWB:begin
+				$display("ALUWB");
+				PCWrite = 0;
+				MemWrite = 0;
+				IRWrite = 0;
+				ResultSrc = 2'b00;
+				RegWrite = 1;
+				state = Fetch_CalculatePC;
+			end
+			BEQ:begin
+				$display("BEQ");
+				ALUSrcA = 2'b10;
+				ALUSrcB = 2'b00; 
+				ALUControl = 2'b01;
+				ResultSrc = 2'b00;
+				branch = 1'b1;
+				if(branch == 1'b1 & Zero == 1'b1)
+					PCWrite = 1; 
+					
+				state = Fetch_CalculatePC;
+
+			end
+			JAL:begin
+				$display("JAL");
+				ALUSrcA = 2'b01;
+				ALUSrcB = 2'b10; 
+				ALUControl = 2'b00;
+				ResultSrc = 2'b00; 
+				PCWrite = 1;  
+				state = ALUWB;
+			end
+			default:begin
+				$display("Default");
+				state = 4'b0000;
+				AdrSrc = 0; 
+				IRWrite = 0; 
+				ALUSrcA = 0;
+				ALUSrcB = 0; 
+				ALUControl = 0;
+				ResultSrc = 0;
+				RegWrite = 0;
+				MemWrite = 0; 
+				PCWrite = 0; 
+				ImmSrc = 0; 
+				state = Fetch_CalculatePC;
+			end
+		endcase
 	end
-	endcase
 end
 endmodule
 
