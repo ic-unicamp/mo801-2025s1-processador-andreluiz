@@ -16,6 +16,7 @@ output [31:0] RD2;
 reg [31:0] Registers[31:0];
 integer k;
 
+
 //Associa às saídas RD1 e RD2 os valores no índice A1 e A2, respectivamente, do meu vetor de registradores;
 assign RD1 = Registers[A1];
 assign RD2 = Registers[A2];
@@ -27,18 +28,13 @@ initial begin
 	end
 end
 
-always @ (posedge clk)
+always @ (WE3)
 begin
-	if(reset)
-	begin
-		for(k=0; k<32; k = k + 1)
-		begin
-			Registers[k] = 32'h0;
-		end
-	end
-	else if(WE3 == 1'b1)
+	if(WE3 == 1'b1)
 	begin
 		Registers[A3] = WD3;
+		//$display("atualiza A3(%d) com valor %d", A3, Registers[A3]);
 	end
+	$display(" x01=%b\n x02=%b\n x06=%b\n x07=%b\n x08=%b\n x09=%b\n x10=%b\n x11=%b\n x12=%b\n x13=%b",Registers[1],Registers[2],Registers[6],Registers[7],Registers[8],Registers[9],Registers[10],Registers[11],Registers[12],Registers[13]);
 end
 endmodule

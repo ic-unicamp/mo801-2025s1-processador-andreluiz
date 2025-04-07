@@ -10,7 +10,7 @@ wire [6:0] opcode, func7; // 7 bits
 //Sinais do Controller
 wire IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite; //1 bit
 wire [1:0] ResultSrc, ALUSrcB, ALUSrcA, ImmSrc; //2 bit
-wire [2:0] ALUControl; 
+wire [9:0] ALUControl; 
 
 //Inputs do ProgramCounter
 reg [31:0] PCNext;
@@ -52,7 +52,7 @@ wire [31:0] multiplex_srcB;
 //Multiplexador Adr - PC(0), address(1)
 wire [31:0] multiplex_adr;
 
-reg [31:0] teste = 32'b00101010010110; 
+
 
 Controller cont(
 	.clk(clk),
@@ -77,7 +77,7 @@ ProgramCounter Prog_count(
 	.clk(clk), 
 	.reset(reset),
 	.PCWrite(PCWrite), 
-	.PCNext(teste), 
+	.PCNext(multiplex_alu), 
 	.PC(PC)
 );
 
@@ -174,24 +174,106 @@ Multiplex Multiplex_instance_ALU(
 	.clk(clk),
 	.reset(reset),
 	.ALUSrc(ResultSrc),
-	.opt1(ALUResult),
+	.opt1(ALUOut),
 	.opt2(ReadData),
-	.opt3(ALUOut),
+	.opt3(ALUResult),
 	.result(multiplex_alu)
 );
 
+integer k=0;
 
-// Gerador de clock
+always begin
+	#1 clk = (clk===1'b0);
+	if(clk === 1'b0) begin
+		k = k+1;
+	end
+end
+// Inicia a simulação e executa até 2000 unidades de tempo após o reset
 initial begin
-clk = 0;
-reset = 0;
-#10;
+  reset = 1'b0;
+  #11 reset = 1'b1;
+  $display("*** Starting simulation. ***");
+  #4000 $finish;
 end
 
+// Verifica se o endereço atingiu 4092 (0xFFC) e encerra a simulação
+always @(posedge clk) begin
+
+if(k<80)begin
+$monitor("PC=%d PCNext=%d OldPC=%d,ALUSrcA=%b, ALUSrcB=%b",PC,multiplex_alu,OldPC,ALUSrcA,ALUSrcB); 
+//$monitor("ALUSrcA=%d, ALUSrcB=%d, ALUResul=%d, ALUOut=%d,Rd=%b, R1=%d, R2=%d",multiplex_srcA,multiplex_srcB,ALUResult,ALUOut,Rd,Rs1,Rs2);
+//$monitor("RD = %h; ALUSrcA = %b; srcA = %d; srcB = %d; RegWrite = %b; ALUResult:%d", ReadData, ALUSrcA, multiplex_srcA,multiplex_srcB, RegWrite,ALUResult);
+//$monitor("A1:%b, A2:%b, RD1:%d, RD2:%d,AluResult:%d, multiplexador_alu=%d",Rs1,Rs2,RD1,RD2,ALUResult,multiplex_alu);
+  if (address >= 'h10) begin
+    $display("Address reached 4092 (0xFFC). Stopping simulation.");
+    $finish;
+  end
+end else begin
+$finish;
+end
+end
+
+
+
+/*
 // Simulação inicial
 initial begin
+//$monitor("IRWrite = %b, MemWrite = %b, AdrSrc = %b, PCWrite = %b, RegWrite = %b; ResultSrc = %b, ALUSrcB = %b, ALUSrcA = %b, ImmSrc = %b, ALUControl = %b\nRD1 = %d, RD2 = %d, Rd = %d", IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite, ResultSrc, ALUSrcB, ALUSrcA, ImmSrc, ALUControl,RD1,RD2,Rd);
+//$monitor("A1:%b, A2:%b, RD1:%d, RD2:%d,AluResult:%d, multiplexador_alu=%d",Rs1,Rs2,RD1,RD2,ALUResult,multiplex_alu);
+$monitor("RD = %h;srcA = %d; srcB = %d", ReadData, multiplex_srcA,multiplex_srcB);
+clk = 1;
+#10;
+//Ciclo 1
+clk = 0;
+#10;
+clk = 1;
+#10;
 
-end
+//Ciclo 2
+clk = 0;
+#10;
+clk = 1;
+#10;
+
+//Ciclo 3
+clk = 0;
+#10;
+clk = 1;
+#10;
+
+//Ciclo 4
+clk = 0;
+#10;
+clk = 1;
+#10;
+
+//Ciclo 5
+clk = 0;
+#10;
+clk = 1;
+#10;
+
+//Ciclo 6
+clk = 0;
+#10;
+clk = 1;
+#10;
+//Ciclo 7
+clk = 0;
+#10;
+clk = 1;
+#10;
+//Ciclo 8
+clk = 0;
+#10;
+clk = 1;
+#10;
+//Ciclo 9
+clk = 0;
+#10;
+clk = 1;
+#10;
+end*/
 
 
 

@@ -8,7 +8,7 @@ input [6:0] opcode, func7; // 7 bits
 //Sinais do Controller
 output reg IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite; //1 bit
 output reg [1:0] ResultSrc, ALUSrcB, ALUSrcA, ImmSrc; //2 bit
-output reg [2:0] ALUControl;
+output reg [9:0] ALUControl;
 
 reg branch = 0; 
 
@@ -25,18 +25,28 @@ localparam ExecuteL          = 5'b01110;
 localparam ALUWB             = 5'b01000;
 localparam BEQ               = 5'b01001;
 localparam JAL               = 5'b01011;
+localparam AUIPC             = 5'b01100;
+localparam LUI               = 5'b01101;
 localparam Fetch_CalculatePC    = 5'b01111;
 
 initial begin
 	state = 4'b11111;//Default
 end
 
+always @ (Zero) begin
+    if(branch == 1'b1 & Zero == 1'b1)
+	PCWrite = 1; 
+    else
+        PCWrite = 0;
+end
+
+
 always @ (posedge clk)
 begin
 //$display("IRWrite = %b, MemWrite = %b, AdrSrc = %b, PCWrite = %b, RegWrite = %b; ResultSrc = %b, ALUSrcB = %b, ALUSrcA = %b, ImmSrc = %b, ALUControl = %b\n", IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite, ResultSrc, ALUSrcB, ALUSrcA, ImmSrc, ALUControl);
 //$display("PCWrite = %b; IRWrite = %b; RegWrite = %b",PCWrite, IRWrite, RegWrite);
 	if(reset == 1'b0) begin
-		state = 5'b0000;
+		state = 5'b01111;
 	end else begin	
 		case(opcode)
 			7'b0000011: ImmSrc = 2'b00;
@@ -51,13 +61,14 @@ begin
 			Fetch_CalculatePC:begin
 				$display("Fetch_CalculatePC");
 				AdrSrc = 0; 
-				IRWrite = 1; 
+				IRWrite = 0; 
 				ALUSrcA = 2'b00;
 				ALUSrcB = 2'b10; 
 				ALUControl = 2'b00;
 				ResultSrc = 2'b10; 
+				RegWrite = 0;
 				PCWrite = 0; 
-				state = Fetch;
+				state = Fetch; 
 			end
 			Fetch:begin
 				$display("Fetch");
@@ -67,6 +78,7 @@ begin
 				ALUSrcB = 2'b10; 
 				ALUControl = 2'b00;
 				ResultSrc = 2'b10; 
+				RegWrite = 0;
 				PCWrite = 1; 
 				state = Decode;
 			end
@@ -76,6 +88,8 @@ begin
 				IRWrite = 0;
 				MemWrite = 0;
 				RegWrite = 0;
+				ALUSrcA = 2'b01;
+				ALUSrcB = 2'b01;
 				case(opcode)
 					7'b0000011: state = MemAdr;
 					7'b0100011: state = MemAdr;
@@ -83,6 +97,8 @@ begin
 					7'b0010011: state = ExecuteL;
 					7'b1101111: state = JAL;
 					7'b1100011: state = BEQ;
+					7'b0010111: state = AUIPC;
+					7'b0110111: state = LUI;
 					default: state = Fetch_CalculatePC;
 				endcase
 			end
@@ -90,7 +106,7 @@ begin
 				$display("MemAdr");
 				ALUSrcA = 2'b10;
 				ALUSrcB = 2'b01; 
-				ALUControl = 2'b00; 
+				ALUControl = 10'b0000000000; 
 				
 				case(opcode)
 					7'b0000011: state = MemRead;
@@ -117,19 +133,14 @@ begin
 				$display("MemWrite");
 				AdrSrc = 1; 
 				ResultSrc = 2'b00;
-				MemWrite = 0;
+				MemWrite = 1;
 				state = Fetch_CalculatePC;
 			end
 			ExecuteR:begin
 				$display("ExecuteR");
 				ALUSrcA = 2'b10;
 				ALUSrcB = 2'b00; 
-				case({func7,func3}) //Se der tempo, englobar outras possibilidades de operação
-					10'b0000000000: ALUControl = 2'b00;
-					10'b0100000000: ALUControl = 2'b01;
-					10'b0000000111: ALUControl = 2'b10;
-					10'b0000000110: ALUControl = 2'b11;
-				endcase
+				ALUControl = {func7,func3};
 				state = ALUWB;
 			end
 			ExecuteL:begin
@@ -153,20 +164,35 @@ begin
 				state = Fetch_CalculatePC;
 			end
 			BEQ:begin
-				$display("BEQ");
+				$display("BEQ --- Zero: %b",Zero);
 				ALUSrcA = 2'b10;
 				ALUSrcB = 2'b00; 
-				ALUControl = 2'b01;
+				ALUControl = 10'b0100000000;
 				ResultSrc = 2'b00;
-				branch = 1'b1;
-				if(branch == 1'b1 & Zero == 1'b1)
-					PCWrite = 1; 
-					
+				branch = 1'b1;					
 				state = Fetch_CalculatePC;
 
 			end
 			JAL:begin
 				$display("JAL");
+				ALUSrcA = 2'b01;
+				ALUSrcB = 2'b10; 
+				ALUControl = 2'b00;
+				ResultSrc = 2'b00; 
+				PCWrite = 1;  
+				state = ALUWB;
+			end
+			AUIPC:begin
+				$display("AUIPC");
+				ALUSrcA = 2'b01;
+				ALUSrcB = 2'b10; 
+				ALUControl = 2'b00;
+				ResultSrc = 2'b00; 
+				PCWrite = 1;  
+				state = ALUWB;
+			end
+			LUI:begin
+				$display("LUI");
 				ALUSrcA = 2'b01;
 				ALUSrcB = 2'b10; 
 				ALUControl = 2'b00;
@@ -190,6 +216,7 @@ begin
 				state = Fetch_CalculatePC;
 			end
 		endcase
+		$display("Branch:%b",branch);
 	end
 end
 endmodule

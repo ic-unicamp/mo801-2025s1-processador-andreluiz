@@ -10,20 +10,26 @@ output reg [6:0] Instruction_func7;
 
 reg [31:0] InstructionRegister;
 
-always @ (posedge clk)
+always @ (IRWrite)
 begin
-	if(IRWrite == 1) begin
-	   InstructionRegister = RD;
-	   $display("InstructionRegister = %b", InstructionRegister);
-	end	
+	if(reset == 1'b0) begin
+		InstructionRegister = 0;
+	end else begin	
+	    if(IRWrite == 1) begin
+		InstructionRegister = RD;
+    	        $display("InstructionRegister = %h", InstructionRegister);
 
-        Instruction_op = RD[6:0];
-        Instruction_rd = RD[11:7];
-	Instruction_rs1 = RD[19:15];
-	Instruction_rs2 = RD[24:20];
-	Instruction_extend = RD[31:7];
-	Instruction_func3 = RD[14:12];
-	Instruction_func7 = RD[31:25];
-        OldPC = PC;
+		Instruction_op = RD[6:0];
+		Instruction_rd = RD[11:7];
+		Instruction_rs1 = RD[19:15];
+		Instruction_rs2 = RD[24:20];
+		Instruction_extend = RD[31:7];
+		Instruction_func3 = RD[14:12];
+		Instruction_func7 = RD[31:25];
+		OldPC = PC;
+		
+     		$display("opcode=%b, rs1=%b,rs2=%b,imm=%b,func3=%b",Instruction_op,Instruction_rs1,Instruction_rs2,Instruction_extend,Instruction_func3);
+		end	
+        end
 end
 endmodule

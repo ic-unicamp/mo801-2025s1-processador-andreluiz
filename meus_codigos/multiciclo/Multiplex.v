@@ -6,9 +6,8 @@ input [31:0] opt1, opt2, opt3;
 
 output reg [31:0] result;
 
-always @ (posedge clk)
+always @ (*)
 begin
-	//$display("opt3: %d",opt3);
         //$display("ALUSrc: %b",ALUSrc);
 	case(ALUSrc)
 	     2'b00 : result = opt1;
