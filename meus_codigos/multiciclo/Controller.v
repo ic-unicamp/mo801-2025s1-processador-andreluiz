@@ -30,16 +30,26 @@ localparam LUI               = 5'b01101;
 localparam Fetch_CalculatePC    = 5'b01111;
 
 initial begin
-	state = 4'b11111;//Default
+	state = 5'b11111;//Default
 end
 
 always @ (Zero) begin
+    $display("OLHA QUI, BRANCH = %b e ZERO = %b",branch,Zero);
     if(branch == 1'b1 & Zero == 1'b1)
 	PCWrite = 1; 
     else
         PCWrite = 0;
 end
 
+always @ (opcode) begin
+	case(opcode)
+		7'b0000011: ImmSrc = 2'b00;
+		7'b0100011: ImmSrc = 2'b01;
+		7'b0010011: ImmSrc = 2'b00;
+		7'b1100011: ImmSrc = 2'b10;
+		default: ImmSrc = 2'b00;
+	endcase
+end
 
 always @ (posedge clk)
 begin
@@ -48,13 +58,6 @@ begin
 	if(reset == 1'b0) begin
 		state = 5'b01111;
 	end else begin	
-		case(opcode)
-			7'b0000011: ImmSrc = 2'b00;
-			7'b0100011: ImmSrc = 2'b01;
-			7'b0010011: ImmSrc = 2'b00;
-			7'b1100011: ImmSrc = 2'b10;
-			default: ImmSrc = 2'b00;
-		endcase
 
 		branch = 0;
 		case(state)
@@ -167,7 +170,10 @@ begin
 				$display("BEQ --- Zero: %b",Zero);
 				ALUSrcA = 2'b10;
 				ALUSrcB = 2'b00; 
-				ALUControl = 10'b0100000000;
+				case(func3)
+					3'b000:ALUControl = 10'b0000001000;
+					3'b001:ALUControl = 10'b0000001001;
+				endcase
 				ResultSrc = 2'b00;
 				branch = 1'b1;					
 				state = Fetch_CalculatePC;

@@ -11,7 +11,7 @@ begin
 	case(immSrc)
 		2'b00 : immExt = immValue[24:13]; //L-type 
 		2'b01 : immExt = {immValue[24:18],immValue[4:0]}; //S-type
-		2'b10 : immExt = {immValue[24:18],immValue[4:1]}; //B-type
+		2'b10 : immExt = $signed({immValue[24],immValue[0],immValue[23:18],immValue[4:1],1'b0}); //B-type
 		default : immExt = 32'b0; //R type
 	endcase
 	$display("immSrc: %b, immExt: %d",immSrc,immExt);

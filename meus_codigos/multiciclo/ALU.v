@@ -20,6 +20,8 @@ localparam SRL               = 10'b0000000101;
 localparam SRA               = 10'b0100000101;
 localparam OR                = 10'b0000000110;
 localparam AND               = 10'b0000000111;
+localparam BEQ               = 10'b0000001000;
+localparam BNE               = 10'b0000001001;
 
 //Quando qualquer um dos elementos for modificado...
 always @ (*)
@@ -28,10 +30,7 @@ begin
 	//Caso a entrada não se pareça com nenhuma opção do case, o resultado de ALUResult será um registrador zerado;
 	case(ALUControl)
 		ADD : ALUResult = srcA + srcB;
-		SUB :begin 
-			ALUResult = srcA - srcB;
-			Zero = (ALUResult == 0)?1:0;
-		end
+		SUB : ALUResult = srcA - srcB;
 		SLL : ALUResult = srcA << srcB;
 		SLT : ALUResult = (srcA < srcB)?32'b1:32'b0;
 		SLTU: ALUResult = (srcA < srcB)?32'b1:32'b0;
@@ -40,9 +39,23 @@ begin
 		SRA : ALUResult = $signed(srcA) >> srcB;
 		OR  : ALUResult = srcA | srcB;
 		AND : ALUResult = srcA & srcB;
+		BEQ :begin 
+			ALUResult = srcA - srcB;
+			Zero = (ALUResult == 0)?1:0;
+		end
+		BNE :begin 
+			ALUResult = srcA - srcB;
+			Zero = (ALUResult != 0)?1:0;
+			$display("BRANCH NOT EQUALLLLLL");
+		end
 		default : ALUResult = 32'h0;
 	endcase
 	$display("ALUResult:%d",ALUResult);
 end
+
+always @ (posedge clk) begin
+	Zero = 0;
+end
+
 
 endmodule

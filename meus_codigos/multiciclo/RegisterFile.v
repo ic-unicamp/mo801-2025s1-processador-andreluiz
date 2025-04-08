@@ -35,6 +35,6 @@ begin
 		Registers[A3] = WD3;
 		//$display("atualiza A3(%d) com valor %d", A3, Registers[A3]);
 	end
-	$display(" x01=%b\n x02=%b\n x06=%b\n x07=%b\n x08=%b\n x09=%b\n x10=%b\n x11=%b\n x12=%b\n x13=%b",Registers[1],Registers[2],Registers[6],Registers[7],Registers[8],Registers[9],Registers[10],Registers[11],Registers[12],Registers[13]);
+	$display(" x01=%b\n x02=%b\n x03=%b\n x04=%b\n x05=%b\n x06=%b\n x06=%b\n x08=%b\n x09=%b\n x10=%b\n x11=%b\n x12=%b\n x13=%b",Registers[1],Registers[2],Registers[3],Registers[4],Registers[5],Registers[6],Registers[7],Registers[8],Registers[9],Registers[10],Registers[11],Registers[12],Registers[13]);
 end
 endmodule
