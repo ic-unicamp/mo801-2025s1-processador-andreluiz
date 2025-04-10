@@ -46,7 +46,7 @@ begin
     if (~reset)
         state = 0;
     else
-        state = next_state;
+        state = next_state;				
 end
 
 always @ (*)
@@ -61,10 +61,9 @@ begin
 	endcase
 //$display("IRWrite = %b, MemWrite = %b, AdrSrc = %b, PCWrite = %b, RegWrite = %b; ResultSrc = %b, ALUSrcB = %b, ALUSrcA = %b, ImmSrc = %b, ALUControl = %b\n", IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite, ResultSrc, ALUSrcB, ALUSrcA, ImmSrc, ALUControl);
 //$display("PCWrite = %b; IRWrite = %b; RegWrite = %b",PCWrite, IRWrite, RegWrite);
-	if(~reset) begin
-        state = 4'd0;
-        next_state = 4'd0;
-        branch = 1'b0;
+
+	next_state = 4'd0;
+	branch = 1'b0;
 	AdrSrc = 0; 
 	IRWrite = 0; 
 	ALUSrcA = 0;
@@ -75,164 +74,158 @@ begin
 	MemWrite = 0; 
 	PCWrite = 0; 
 	ImmSrc = 0; 
-        $display("RESETTING");
-	end else begin	
 
-		branch = 0;
-		RegWrite = 0;
-		PCWrite = 0;
-		case(state)
-			Fetch:begin
-				$display("====Fetch====");
-				AdrSrc = 0; 
-				IRWrite = 1; 
-				ALUSrcA = 2'b00;
-				ALUSrcB = 2'b10; 
-				ALUControl = 2'b00;
-				ResultSrc = 2'b10; 
-				RegWrite = 0;
-				PCWrite = 1; 
-				next_state = Decode;
-			end
-			Decode:begin
-				$display("====Decode====");
-				PCWrite = 0;
-				IRWrite = 0;
-				MemWrite = 0;
-				RegWrite = 0;
-				ALUSrcA = 2'b01;
-				ALUSrcB = 2'b01;
-				case(opcode)
-					7'b0000011: next_state = MemAdr;
-					7'b0100011: next_state = MemAdr;
-					7'b0110011: next_state = ExecuteR;
-					7'b0010011: next_state = ExecuteL;
-					7'b1101111: next_state = JAL;
-					7'b1100011: next_state = BEQ;
-					7'b0010111: next_state = AUIPC;
-					7'b0110111: next_state = LUI;
-					default: next_state = Fetch;
-				endcase
-			end
-			MemAdr:begin
-				$display("====MemAdr====");
-				ALUSrcA = 2'b10;
-				ALUSrcB = 2'b01; 
-				ALUControl = 10'b0000000000; 
-				
-				case(opcode)
-					7'b0000011: next_state = MemRead;
-					7'b0100011: next_state = MemWrite_state;
-					default: next_state = Fetch;
-				endcase
-				
-			end
-			MemRead:begin
-				$display("====MemRead====");
-				AdrSrc = 1; 
-				ResultSrc = 2'b10;
-				
-				next_state = MemWB;
-			end
-			MemWB:begin
-				$display("====MemWB====");
-				ResultSrc = 2'b01;
-				RegWrite = 1;
-				next_state = Fetch;
-			end
-			MemWrite_state:begin
-				$display("====MemWrite====");
-				AdrSrc = 1; 
-				ResultSrc = 2'b00;
-				MemWrite = 1;
-				next_state = Fetch;
-			end
-			ExecuteR:begin
-				$display("====ExecuteR====");
-				ALUSrcA = 2'b10;
-				ALUSrcB = 2'b00; 
-				ALUControl = {func7,func3};
-				next_state = ALUWB;
-			end
-			ExecuteL:begin
-				$display("====ExecuteL====");
-				PCWrite = 0;
-				MemWrite = 0;
-				IRWrite = 0;
-				RegWrite = 0;
-				ALUSrcA = 2'b10;
-				ALUSrcB = 2'b01; 
-				ALUControl = func3;
-				next_state = ALUWB;
-			end
-			ALUWB:begin
-				$display("====ALUWB====");
-				PCWrite = 0;
-				MemWrite = 0;
-				IRWrite = 0;
-				ResultSrc = 2'b00;
-				RegWrite = 1;
-				next_state = Fetch;
-			end
-			BEQ:begin
-				$display("====BEQ --- Zero: %b====",Zero);
-				ALUSrcA = 2'b10;
-				ALUSrcB = 2'b00; 
-				case(func3)
-					3'b000:ALUControl = 10'b0000001000;
-					3'b001:ALUControl = 10'b0000001001;
-					3'b100:ALUControl = 10'b0000001010;
-					3'b101:ALUControl = 10'b0000001011;
-				endcase
-				ResultSrc = 2'b00;
-				branch = 1'b1;					
-				next_state = Fetch;
+	case(state)
+		Fetch:begin
+			$display("====Fetch====");
+			AdrSrc = 0; 
+			IRWrite = 1; 
+			ALUSrcA = 2'b00;
+			ALUSrcB = 2'b10; 
+			ALUControl = 2'b00;
+			ResultSrc = 2'b10; 
+			RegWrite = 0;
+			PCWrite = 1; 
+			next_state = Decode;
+		end
+		Decode:begin
+			$display("====Decode====");
+			PCWrite = 0;
+			IRWrite = 0;
+			MemWrite = 0;
+			RegWrite = 0;
+			ALUSrcA = 2'b01;
+			ALUSrcB = 2'b01;
+			case(opcode)
+				7'b0000011: next_state = MemAdr;
+				7'b0100011: next_state = MemAdr;
+				7'b0110011: next_state = ExecuteR;
+				7'b0010011: next_state = ExecuteL;
+				7'b1101111: next_state = JAL;
+				7'b1100011: next_state = BEQ;
+				7'b0010111: next_state = AUIPC;
+				7'b0110111: next_state = LUI;
+				default: next_state = Fetch;
+			endcase
+		end
+		MemAdr:begin
+			$display("====MemAdr====");
+			ALUSrcA = 2'b10;
+			ALUSrcB = 2'b01; 
+			ALUControl = 10'b0000000000; 
+			
+			case(opcode)
+				7'b0000011: next_state = MemRead;
+				7'b0100011: next_state = MemWrite_state;
+				default: next_state = Fetch;
+			endcase
+			
+		end
+		MemRead:begin
+			$display("====MemRead====");
+			AdrSrc = 1; 
+			ResultSrc = 2'b10;
+			
+			next_state = MemWB;
+		end
+		MemWB:begin
+			$display("====MemWB====");
+			ResultSrc = 2'b01;
+			RegWrite = 1;
+			next_state = Fetch;
+		end
+		MemWrite_state:begin
+			$display("====MemWrite====");
+			AdrSrc = 1; 
+			ResultSrc = 2'b00;
+			MemWrite = 1;
+			next_state = Fetch;
+		end
+		ExecuteR:begin
+			$display("====ExecuteR====");
+			ALUSrcA = 2'b10;
+			ALUSrcB = 2'b00; 
+			ALUControl = {func7,func3};
+			next_state = ALUWB;
+		end
+		ExecuteL:begin
+			$display("====ExecuteL====");
+			PCWrite = 0;
+			MemWrite = 0;
+			IRWrite = 0;
+			RegWrite = 0;
+			ALUSrcA = 2'b10;
+			ALUSrcB = 2'b01; 
+			ALUControl = func3;
+			next_state = ALUWB;
+		end
+		ALUWB:begin
+			$display("====ALUWB====");
+			PCWrite = 0;
+			MemWrite = 0;
+			IRWrite = 0;
+			ResultSrc = 2'b00;
+			RegWrite = 1;
+			next_state = Fetch;
+		end
+		BEQ:begin
+			$display("====BEQ --- Zero: %b====",Zero);
+			ALUSrcA = 2'b10;
+			ALUSrcB = 2'b00; 
+			case(func3)
+				3'b000:ALUControl = 10'b0000001000;
+				3'b001:ALUControl = 10'b0000001001;
+				3'b100:ALUControl = 10'b0000001010;
+				3'b101:ALUControl = 10'b0000001011;
+			endcase
+			ResultSrc = 2'b00;
+			branch = 1'b1;					
+			next_state = Fetch;
 
-			end
-			JAL:begin
-				$display("====JAL====");
-				ALUSrcA = 2'b01;
-				ALUSrcB = 2'b10; 
-				ALUControl = 2'b00;
-				ResultSrc = 2'b00; 
-				PCWrite = 1;  
-				next_state = ALUWB;
-			end
-			AUIPC:begin
-				$display("====AUIPC====");
-				ALUSrcA = 2'b01;
-				ALUSrcB = 2'b10; 
-				ALUControl = 2'b00;
-				ResultSrc = 2'b00; 
-				PCWrite = 1;  
-				next_state = ALUWB;
-			end
-			LUI:begin
-				$display("====LUI====");
-				ALUSrcA = 2'b01;
-				ALUSrcB = 2'b10; 
-				ALUControl = 2'b00;
-				ResultSrc = 2'b00; 
-				PCWrite = 1;  
-				next_state = ALUWB;
-			end
-			default:begin
-				$display("====Default====");
-				AdrSrc = 0; 
-				IRWrite = 0; 
-				ALUSrcA = 0;
-				ALUSrcB = 0; 
-				ALUControl = 0;
-				ResultSrc = 0;
-				RegWrite = 0;
-				MemWrite = 0; 
-				PCWrite = 0; 
-				ImmSrc = 0; 
-				next_state = Fetch;
-			end
-		endcase
-		$display("Branch:%b",branch);
-	end
+		end
+		JAL:begin
+			$display("====JAL====");
+			ALUSrcA = 2'b01;
+			ALUSrcB = 2'b10; 
+			ALUControl = 2'b00;
+			ResultSrc = 2'b00; 
+			PCWrite = 1;  
+			next_state = ALUWB;
+		end
+		AUIPC:begin
+			$display("====AUIPC====");
+			ALUSrcA = 2'b01;
+			ALUSrcB = 2'b10; 
+			ALUControl = 2'b00;
+			ResultSrc = 2'b00; 
+			PCWrite = 1;  
+			next_state = ALUWB;
+		end
+		LUI:begin
+			$display("====LUI====");
+			ALUSrcA = 2'b01;
+			ALUSrcB = 2'b10; 
+			ALUControl = 2'b00;
+			ResultSrc = 2'b00; 
+			PCWrite = 1;  
+			next_state = ALUWB;
+		end
+		default:begin
+			$display("====Default====");
+			AdrSrc = 0; 
+			IRWrite = 0; 
+			ALUSrcA = 0;
+			ALUSrcB = 0; 
+			ALUControl = 0;
+			ResultSrc = 0;
+			RegWrite = 0;
+			MemWrite = 0; 
+			PCWrite = 0; 
+			ImmSrc = 0; 
+			next_state = Fetch;
+		end
+	endcase
+	$display("Branch:%b",branch);
 end
 endmodule
 
