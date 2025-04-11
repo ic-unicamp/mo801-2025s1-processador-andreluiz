@@ -7,7 +7,8 @@ input [6:0] opcode, func7; // 7 bits
 
 //Sinais do Controller
 output reg IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite; //1 bit
-output reg [1:0] ResultSrc, ALUSrcB, ALUSrcA, ImmSrc; //2 bit
+output reg [1:0] ResultSrc, ALUSrcB, ALUSrcA; //2 bit
+output reg [2:0] ImmSrc;
 output reg [9:0] ALUControl;
 
 reg branch = 0; 
@@ -52,12 +53,13 @@ end
 always @ (*)
 begin
 	case(opcode)
-		7'b0000011: ImmSrc = 2'b00;
-		7'b0100011: ImmSrc = 2'b01;
-		7'b0010011: ImmSrc = 2'b00;
-		7'b1100011: ImmSrc = 2'b10;
-		7'b1101111: ImmSrc = 2'b11;
-		default: ImmSrc = 2'b00;
+		7'b0000011: ImmSrc = 3'b000;
+		7'b0100011: ImmSrc = 3'b001;
+		7'b0010011: ImmSrc = 3'b000;
+		7'b1100011: ImmSrc = 3'b010;
+		7'b1101111: ImmSrc = 3'b011;
+		7'b0110111: ImmSrc = 3'b100;
+		default: ImmSrc = 3'b000;
 	endcase
 //$display("IRWrite = %b, MemWrite = %b, AdrSrc = %b, PCWrite = %b, RegWrite = %b; ResultSrc = %b, ALUSrcB = %b, ALUSrcA = %b, ImmSrc = %b, ALUControl = %b\n", IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite, ResultSrc, ALUSrcB, ALUSrcA, ImmSrc, ALUControl);
 //$display("PCWrite = %b; IRWrite = %b; RegWrite = %b",PCWrite, IRWrite, RegWrite);
@@ -67,13 +69,12 @@ begin
         branch = 1'b0;
 	AdrSrc = 0; 
 	IRWrite = 0; 
-
 	ALUControl = 0;
 	ResultSrc = 0;
 	RegWrite = 0;
 	MemWrite = 0; 
 	PCWrite = 0; 
-	ImmSrc = 0; 
+	 
 		case(state)
 			Fetch:begin
 				$display("====Fetch====");
@@ -202,11 +203,13 @@ begin
 			end
 			LUI:begin
 				$display("====LUI====");
-				ALUSrcA = 2'b01;
-				ALUSrcB = 2'b10; 
-				ALUControl = 2'b00;
-				ResultSrc = 2'b00; 
-				PCWrite = 1;  
+				PCWrite = 0;
+				MemWrite = 0;
+				IRWrite = 0;
+				RegWrite = 0;
+				ALUSrcA = 2'b10;
+				ALUSrcB = 2'b01; 
+				ALUControl = 10'b0000001110;
 				next_state = ALUWB;
 			end
 			default:begin

@@ -9,7 +9,8 @@ wire [6:0] opcode, func7; // 7 bits
 
 //Sinais do Controller
 wire IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite; //1 bit
-wire [1:0] ResultSrc, ALUSrcB, ALUSrcA, ImmSrc; //2 bit
+wire [1:0] ResultSrc, ALUSrcB, ALUSrcA; //2 bit
+wire [2:0] ImmSrc;
 wire [9:0] ALUControl; 
 
 //Inputs do ProgramCounter
@@ -51,8 +52,6 @@ wire [31:0] multiplex_srcB;
 
 //Multiplexador Adr - PC(0), address(1)
 wire [31:0] multiplex_adr;
-
-
 
 Controller cont(
 	.clk(clk),

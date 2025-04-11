@@ -26,6 +26,7 @@ localparam BLT               = 10'b0000001010;
 localparam BGE               = 10'b0000001011;
 localparam BLTU              = 10'b0000001100;
 localparam BGEU              = 10'b0000001101;
+localparam LUI               = 10'b0000001110;
 
 //Quando qualquer um dos elementos for modificado...
 always @ (*)
@@ -73,6 +74,7 @@ begin
 			Zero = (ALUResult >= 0)?1:0;
 		        $display("BRANCH GREATER OR EQUAL UNSIGNED; ZERO = %b; ALUResult = %d", Zero, ALUResult);
 		end
+		LUI:ALUResult = srcB;
 		default : ALUResult = 32'h0;
 	endcase
 	$display("SrcA:%d + SrcB:%d = ALUResult:%d",srcA,srcB,ALUResult);
