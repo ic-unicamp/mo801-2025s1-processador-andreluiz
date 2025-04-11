@@ -61,26 +61,19 @@ begin
 	endcase
 //$display("IRWrite = %b, MemWrite = %b, AdrSrc = %b, PCWrite = %b, RegWrite = %b; ResultSrc = %b, ALUSrcB = %b, ALUSrcA = %b, ImmSrc = %b, ALUControl = %b\n", IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite, ResultSrc, ALUSrcB, ALUSrcA, ImmSrc, ALUControl);
 //$display("PCWrite = %b; IRWrite = %b; RegWrite = %b",PCWrite, IRWrite, RegWrite);
-	if(~reset) begin
-        state = 4'd0;
+	if(reset) begin	
+
         next_state = 4'd0;
         branch = 1'b0;
 	AdrSrc = 0; 
 	IRWrite = 0; 
-	ALUSrcA = 0;
-	ALUSrcB = 0; 
+
 	ALUControl = 0;
 	ResultSrc = 0;
 	RegWrite = 0;
 	MemWrite = 0; 
 	PCWrite = 0; 
 	ImmSrc = 0; 
-        $display("RESETTING");
-	end else begin	
-
-		branch = 0;
-		RegWrite = 0;
-		PCWrite = 0;
 		case(state)
 			Fetch:begin
 				$display("====Fetch====");
