@@ -47,7 +47,7 @@ begin
     if (~reset)
         state = 0;
     else
-        state = next_state;
+        state = next_state;				
 end
 
 always @ (*)
@@ -63,6 +63,7 @@ begin
 	endcase
 //$display("IRWrite = %b, MemWrite = %b, AdrSrc = %b, PCWrite = %b, RegWrite = %b; ResultSrc = %b, ALUSrcB = %b, ALUSrcA = %b, ImmSrc = %b, ALUControl = %b\n", IRWrite, MemWrite, AdrSrc, PCWrite, RegWrite, ResultSrc, ALUSrcB, ALUSrcA, ImmSrc, ALUControl);
 //$display("PCWrite = %b; IRWrite = %b; RegWrite = %b",PCWrite, IRWrite, RegWrite);
+
 	if(reset) begin	
 
         next_state = 4'd0;
