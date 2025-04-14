@@ -1,0 +1,25 @@
+.global _boot
+.text
+
+_boot:                    /* x0  = 0    0x000 */
+    /* Test ADDI */
+    addi x1 , x0,   2000  /* x1  = 1000 0x3E8 */
+    addi x2 , x0,   1000  /* x2  = 3000 0xBB8 */
+    addi x3,  x0,    100
+    
+    sub x4, x1, x3
+    addi x3, x3, 100
+    bge x4, x2, -8
+
+    addi x5, x0, 1024
+    addi x5, x5, 1024
+    
+    sw x1, 0(x5)
+    sw x2, 4(x5)
+    sw x3, 8(x5)
+    sw x4, 12(x5)
+    
+.data
+variable:
+	.word 0xdeadbeef
+                    

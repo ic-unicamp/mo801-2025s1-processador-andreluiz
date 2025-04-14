@@ -30,7 +30,7 @@ end
 
 always @ (WE3)
 begin
-	if(WE3 == 1'b1)
+	if(WE3 == 1'b1 & A3 > 0)
 	begin
 		Registers[A3] = WD3;
 		//$display("atualiza A3(%d) com valor %d", A3, Registers[A3]);
