@@ -2,14 +2,14 @@
 .text
 
 _boot:                    /* x0  = 0    0x000 */
-    /* Test XORI, ANDI and OR*/
+    /* Test BGE*/
     addi x1, x0,   1500  
     addi x2, x0,   1000
     
     addi x15, x0, 1024
     addi x15, x15, 1024
     
-    bge x1, x2, 16
+    bgeu x1, x2, 16
     addi x1, x0, 1000
     addi x1, x0, 1000
     addi x1, x0, 1000

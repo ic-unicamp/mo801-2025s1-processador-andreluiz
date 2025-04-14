@@ -2,11 +2,11 @@
 .text
 
 _boot:                    /* x0  = 0    0x000 */
-    /* Test ADDI */
+    /* Test  ADDI in x0*/
     addi x1 , x0,   1024  /* x1  = 1000 0x3E8 */
     addi x1, x1, 1024
 
-	addi x0, x0, 1000 
+    addi x0, x0, 1000 
 
     sw x0, 0(x1)
     

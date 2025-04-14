@@ -2,7 +2,7 @@
 .text
 
 _boot:                    /* x0  = 0    0x000 */
-    /* Test XORI, ANDI and OR*/
+    /* Test JAL*/
     addi x1, x0,   1500  
     addi x2, x0,   16
     

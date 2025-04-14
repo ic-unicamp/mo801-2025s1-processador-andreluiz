@@ -2,7 +2,7 @@
 .text
 
 _boot:                    /* x0  = 0    0x000 */
-    /* Test ADDI */
+    /* Test LUI */
     lui x1, 1000
     lui x2, 1111
     lui x3, 1

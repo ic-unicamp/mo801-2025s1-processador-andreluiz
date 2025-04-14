@@ -2,7 +2,7 @@
 .text
 
 _boot:                    /* x0  = 0    0x000 */
-    /* Test XORI, ANDI and OR*/
+    /* Test SLLI SRLI*/
     addi x1 , x0,   1000  /* x1  = 1000 0x3E8 */
     
     slli x2, x1, 3
