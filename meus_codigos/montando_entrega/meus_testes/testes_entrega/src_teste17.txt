@@ -1,0 +1,44 @@
+.global _boot
+.text
+
+_boot:                    /* x0  = 0    0x000 */
+    /* Test XORI, ANDI and OR*/
+    addi x1, x0,   1000  
+    addi x2, x0,   500
+    addi x3, x0,   -1000  
+    addi x4, x0,   -500
+    
+    slt x5, x1, x2 /* x5 = 1000 < 500 = 0*/
+    slt x6, x2, x1 /* x6 = 500 < 1000 = 1*/
+    slt x7, x1, x3 /* x7 = 1000 < -1000 = 0*/
+    slt x8, x3, x1 /* x8 = -1000 < 1000 = 1*/
+    slt x9, x3, x4 /* x9 = -1000 < -500 = 1*/
+    slt x10, x4, x3 /* x10 = -500 < -1000 = 0*/
+  
+    sltu x11, x1, x2 /* x11 = 1000 < 500 = 0*/
+    sltu x12, x2, x1 /* x12 = 500 < 1000 = 1*/
+    sltu x13, x1, x3 /* x13 = 1000 < unsigned(-1000) = 1*/
+    sltu x14, x3, x1 /* x14 = unsigned(-1000) < 1000 = 0*/
+    sltu x15, x3, x4 /* x15 = unsigned(-1000) < unsigned(-500) = 1*/
+    sltu x16, x4, x3 /* x16 = unsigned(-500) < unsigned(-1000) = 0*/
+    
+    addi x17, x0, 1024
+    addi x17, x17, 1024
+  
+    sw x5, 0(x17)
+    sw x6, 4(x17)
+    sw x7, 8(x17)
+    sw x8, 12(x17)
+    sw x9, 16(x17)
+    sw x10, 20(x17)
+    sw x11, 24(x17)
+    sw x12, 28(x17)
+    sw x13, 32(x17)
+    sw x14, 36(x17)
+    sw x15, 40(x17)
+    sw x16, 44(x17)
+    
+.data
+variable:
+	.word 0xdeadbeef
+                    
